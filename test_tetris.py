@@ -16,6 +16,8 @@ _pygame_stub.K_RIGHT = 2
 _pygame_stub.K_UP = 3
 _pygame_stub.K_SPACE = 4
 _pygame_stub.K_m = 5
+_pygame_stub.K_p = 6
+_pygame_stub.K_r = 7
 _pygame_stub.QUIT = 256
 _pygame_stub.KEYDOWN = 768
 
@@ -141,6 +143,29 @@ class TestThemeToggle(unittest.TestCase):
         game.toggle_theme()
         game.toggle_theme()
         self.assertEqual(game.theme, 'dark')
+
+
+class TestPauseResume(unittest.TestCase):
+    def test_initial_paused_state(self):
+        game = tetris.Tetris()
+        self.assertFalse(game.paused)
+
+    def test_toggle_pause_pauses_game(self):
+        game = tetris.Tetris()
+        game.toggle_pause()
+        self.assertTrue(game.paused)
+
+    def test_toggle_pause_resumes_game(self):
+        game = tetris.Tetris()
+        game.toggle_pause()
+        game.toggle_pause()
+        self.assertFalse(game.paused)
+
+    def test_toggle_pause_does_nothing_when_game_over(self):
+        game = tetris.Tetris()
+        game.game_over = True
+        game.toggle_pause()
+        self.assertFalse(game.paused)
 
 
 class TestRemovedUIElements(unittest.TestCase):

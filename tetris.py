@@ -8,6 +8,8 @@ import pygame
 # Right - move right
 # Up    - rotate
 # Space - hard drop
+# P     - pause / resume
+# R     - restart
 
 CELL_SIZE = 30
 COLUMNS = 10
@@ -91,6 +93,7 @@ class Tetris:
 		self.current = self.next_piece()
 		self.next = self.next_piece()
 		self.game_over = False
+		self.paused = False
 		self.theme = DEFAULT_THEME
 
 	def next_piece(self):
@@ -144,6 +147,10 @@ class Tetris:
 
 	def toggle_theme(self):
 		self.theme = 'light' if self.theme == 'dark' else 'dark'
+
+	def toggle_pause(self):
+		if not self.game_over:
+			self.paused = not self.paused
 
 
 def draw_grid(surface, grid, theme):
@@ -200,35 +207,46 @@ def main():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				running = False
-			elif event.type == pygame.KEYDOWN and not game.game_over:
-					if event.key == pygame.K_m:
-						game.toggle_theme()
-						continue
-					if event.key == pygame.K_LEFT:
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_r:
+					game = Tetris()
+					fall_timer = 0
+					continue
+				if game.game_over:
+					continue
+				if event.key == pygame.K_p:
+					game.toggle_pause()
+					continue
+				if game.paused:
+					continue
+				if event.key == pygame.K_m:
+					game.toggle_theme()
+					continue
+				if event.key == pygame.K_LEFT:
+					if game.valid_position(game.current, adj_x=-1):
+						game.current.x -= 1
+				elif event.key == pygame.K_RIGHT:
+					if game.valid_position(game.current, adj_x=1):
+						game.current.x += 1
+				elif event.key == pygame.K_UP:
+					# rotate with wall kick attempt
+					old_shape = game.current.shape
+					game.current.rotate()
+					if not game.valid_position(game.current):
+						# try kicks
 						if game.valid_position(game.current, adj_x=-1):
 							game.current.x -= 1
-					elif event.key == pygame.K_RIGHT:
-						if game.valid_position(game.current, adj_x=1):
+						elif game.valid_position(game.current, adj_x=1):
 							game.current.x += 1
-					elif event.key == pygame.K_UP:
-						# rotate with wall kick attempt
-						old_shape = game.current.shape
-						game.current.rotate()
-						if not game.valid_position(game.current):
-							# try kicks
-							if game.valid_position(game.current, adj_x=-1):
-								game.current.x -= 1
-							elif game.valid_position(game.current, adj_x=1):
-								game.current.x += 1
-							else:
-								game.current.shape = old_shape
-					elif event.key == pygame.K_SPACE:
-						# hard drop
-						while game.valid_position(game.current, adj_y=1):
-							game.current.y += 1
-						game.lock_piece()
+						else:
+							game.current.shape = old_shape
+				elif event.key == pygame.K_SPACE:
+					# hard drop
+					while game.valid_position(game.current, adj_y=1):
+						game.current.y += 1
+					game.lock_piece()
 
-		if not game.game_over:
+		if not game.game_over and not game.paused:
 			# gravity based on level
 			level_speed = max(100, fall_speed - (game.level - 1) * 50)
 			if fall_timer >= level_speed:
@@ -254,8 +272,18 @@ def main():
 		if game.game_over:
 			go_font = pygame.font.SysFont('Consolas', 48)
 			go_surf = go_font.render('GAME OVER', True, WHITE)
-			rect = go_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+			rect = go_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 30))
 			screen.blit(go_surf, rect)
+			restart_font = pygame.font.SysFont('Consolas', 22)
+			restart_surf = restart_font.render('Press R to Restart', True, WHITE)
+			restart_rect = restart_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 30))
+			screen.blit(restart_surf, restart_rect)
+
+		if game.paused:
+			pause_font = pygame.font.SysFont('Consolas', 48)
+			pause_surf = pause_font.render('PAUSED', True, WHITE)
+			pause_rect = pause_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+			screen.blit(pause_surf, pause_rect)
 
 		pygame.display.flip()
 
