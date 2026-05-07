@@ -245,17 +245,11 @@ def main():
 		if not game.game_over:
 			draw_piece(screen, game.current, game.theme)
 
-		# UI: score, next piece and theme info
+		# UI: score only
 		font = pygame.font.SysFont('Consolas', 18)
 		ui_color = WHITE if game.theme == 'dark' else (30, 30, 30)
 		score_surf = font.render(f'Score: {game.score}', True, ui_color)
-		lines_surf = font.render(f'Lines: {game.lines}', True, ui_color)
-		level_surf = font.render(f'Level: {game.level}', True, ui_color)
-		mode_surf = font.render(f'Mode: {game.theme.title()} (M to toggle)', True, ui_color)
 		screen.blit(score_surf, (5, 5))
-		screen.blit(lines_surf, (5, 25))
-		screen.blit(level_surf, (5, 45))
-		screen.blit(mode_surf, (5, 65))
 
 		if game.game_over:
 			go_font = pygame.font.SysFont('Consolas', 48)
