@@ -2,6 +2,10 @@
 
 A small, self-contained Tetris clone implemented in Python using Pygame.
 
+## Request Changes
+
+- Remove lines, level and the inline in screen
+
 ## Features
 
 - Playable Tetris: movement, rotation, hard drop, line clear, scoring, and levels.
